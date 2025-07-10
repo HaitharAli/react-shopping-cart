@@ -12,26 +12,36 @@ const useCartProducts = () => {
     quantity: number
   ): ICartProduct => {
     if (currentProduct.id === targetProduct.id) {
-      return Object.assign({
+      // Fixed: Removed unnecessary Object.assign, using proper immutable update
+      return {
         ...currentProduct,
         quantity: currentProduct.quantity + quantity,
-      });
-    } else {
-      return currentProduct;
+      };
     }
+    return currentProduct;
   };
 
   const addProduct = (newProduct: ICartProduct) => {
-    let updatedProducts;
-    const isProductAlreadyInCart = products.some(
+    // Performance optimization: Use findIndex instead of some + map
+    const existingProductIndex = products.findIndex(
       (product: ICartProduct) => newProduct.id === product.id
     );
 
-    if (isProductAlreadyInCart) {
-      updatedProducts = products.map((product: ICartProduct) => {
-        return updateQuantitySafely(product, newProduct, newProduct.quantity);
+    let updatedProducts: ICartProduct[];
+
+    if (existingProductIndex !== -1) {
+      // Update existing product quantity
+      updatedProducts = products.map((product: ICartProduct, index: number) => {
+        if (index === existingProductIndex) {
+          return {
+            ...product,
+            quantity: product.quantity + newProduct.quantity,
+          };
+        }
+        return product;
       });
     } else {
+      // Add new product
       updatedProducts = [...products, newProduct];
     }
 
@@ -50,7 +60,7 @@ const useCartProducts = () => {
 
   const increaseProductQuantity = (productToIncrease: ICartProduct) => {
     const updatedProducts = products.map((product: ICartProduct) => {
-      return updateQuantitySafely(product, productToIncrease, +1);
+      return updateQuantitySafely(product, productToIncrease, 1);
     });
 
     setProducts(updatedProducts);
