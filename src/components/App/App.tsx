@@ -12,7 +12,7 @@ import { useProducts } from 'contexts/products-context';
 import * as S from './style';
 
 function App() {
-  const { isFetching, products, fetchProducts } = useProducts();
+  const { isFetching, products, fetchProducts, productCount } = useProducts();
 
   useEffect(() => {
     fetchProducts();
@@ -30,7 +30,7 @@ function App() {
         </S.Side>
         <S.Main>
           <S.MainHeader>
-            <p>{products?.length} Product(s) found</p>
+            <p>{productCount} Product(s) found</p>
           </S.MainHeader>
           <Products products={products} />
         </S.Main>

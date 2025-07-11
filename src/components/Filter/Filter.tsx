@@ -1,38 +1,48 @@
+import React, { useCallback, useMemo } from 'react';
 import { useProducts } from 'contexts/products-context';
 
 import * as S from './style';
 
 export const availableSizes = ['XS', 'S', 'M', 'ML', 'L', 'XL', 'XXL'];
 
-const Filter = () => {
+const Filter = React.memo(() => {
   const { filters, filterProducts } = useProducts();
 
-  const selectedCheckboxes = new Set(filters);
+  // Memoized selected checkboxes to prevent recreating Set on every render
+  const selectedCheckboxes = useMemo(() => new Set(filters), [filters]);
 
-  const toggleCheckbox = (label: string) => {
-    if (selectedCheckboxes.has(label)) {
-      selectedCheckboxes.delete(label);
-    } else {
-      selectedCheckboxes.add(label);
-    }
+  // Memoized toggle function to prevent unnecessary re-renders of child components
+  const toggleCheckbox = useCallback((label: string) => {
+    const newFilters = selectedCheckboxes.has(label)
+      ? filters.filter(filter => filter !== label)
+      : [...filters, label];
+    
+    filterProducts(newFilters);
+  }, [selectedCheckboxes, filters, filterProducts]);
 
-    const filters = Array.from(selectedCheckboxes) as [];
+  // Memoized checkbox creation to prevent recreating components on every render
+  const createCheckbox = useCallback((label: string) => (
+    <S.Checkbox 
+      label={label} 
+      handleOnChange={toggleCheckbox} 
+      key={label}
+    />
+  ), [toggleCheckbox]);
 
-    filterProducts(filters);
-  };
-
-  const createCheckbox = (label: string) => (
-    <S.Checkbox label={label} handleOnChange={toggleCheckbox} key={label} />
+  // Memoized checkboxes array
+  const checkboxes = useMemo(() => 
+    availableSizes.map(createCheckbox), 
+    [createCheckbox]
   );
-
-  const createCheckboxes = () => availableSizes.map(createCheckbox);
 
   return (
     <S.Container>
       <S.Title>Sizes:</S.Title>
-      {createCheckboxes()}
+      {checkboxes}
     </S.Container>
   );
-};
+});
+
+Filter.displayName = 'Filter';
 
 export default Filter;
