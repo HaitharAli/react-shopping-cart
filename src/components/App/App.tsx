@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
 import Loader from 'components/Loader';
+import ErrorDisplay from 'components/ErrorDisplay';
 import { GithubCorner, GithubStarButton } from 'components/Github';
 import Recruiter from 'components/Recruiter';
 import Filter from 'components/Filter';
@@ -12,7 +13,17 @@ import { useProducts } from 'contexts/products-context';
 import * as S from './style';
 
 function App() {
-  const { isFetching, products, fetchProducts, productCount } = useProducts();
+  const { 
+    isFetching, 
+    isLoading,
+    products, 
+    fetchProducts, 
+    productCount,
+    error,
+    retryFetch,
+    clearError,
+    hasProducts
+  } = useProducts();
 
   useEffect(() => {
     fetchProducts();
@@ -20,7 +31,15 @@ function App() {
 
   return (
     <S.Container>
-      {isFetching && <Loader />}
+      {isLoading && <Loader />}
+      
+      {/* Error Display */}
+      <ErrorDisplay 
+        error={error}
+        onRetry={retryFetch}
+        onClear={clearError}
+      />
+      
       <GithubCorner />
       <Recruiter />
       <S.TwoColumnGrid>
@@ -32,7 +51,7 @@ function App() {
           <S.MainHeader>
             <p>{productCount} Product(s) found</p>
           </S.MainHeader>
-          <Products products={products} />
+          {hasProducts && <Products products={products} />}
         </S.Main>
       </S.TwoColumnGrid>
       <Cart />
