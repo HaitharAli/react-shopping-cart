@@ -1,5 +1,3 @@
-import { KeyboardEvent } from 'react';
-
 import formatPrice from 'utils/formatPrice';
 import { IProduct } from 'models';
 
@@ -45,7 +43,7 @@ const Product = ({ product }: IProps) => {
     openCart();
   };
 
-  const handleAddProductWhenEnter = (event: KeyboardEvent) => {
+  const handleAddProductWhenEnter = (event: any) => {
     if (event.key === 'Enter' || event.code === 'Space') {
       addProduct({ ...product, quantity: 1 });
       openCart();
